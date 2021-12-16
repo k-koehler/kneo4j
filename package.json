@@ -1,0 +1,26 @@
+{
+  "name": "@safetytek/neo4j-ts",
+  "version": "0.0.5",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test:unit": "jest src/__tests__/unit/*.spec.ts",
+    "test:integration": "jest --runInBand src/__tests__/integration/*.spec.ts",
+    "test:watch": "jest --watch --runInBand",
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm i && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^25.1.1",
+    "@types/node": "^13.7.0",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "neo4j-driver": "^4.0.1"
+  }
+}

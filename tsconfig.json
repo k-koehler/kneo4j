@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "outDir": "dist",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.example.ts"]
+}
