@@ -1,5 +1,5 @@
-import * as neo4j from 'neo4j-driver';
-import Query from './query';
+import * as neo4j from "neo4j-driver";
+import Query from "./query";
 
 interface Neo4jParams {
   host: string;
@@ -9,11 +9,11 @@ interface Neo4jParams {
 }
 
 export function checkDriver(
-  driver: neo4j.Driver | null,
+  driver: neo4j.Driver | null
 ): driver is neo4j.Driver | never {
   if (driver === null) {
     throw new Error(
-      "Not connected yet. Did you forget to invoke the 'connect' method?",
+      "Not connected yet. Did you forget to invoke the 'connect' method?"
     );
   }
   return true;
@@ -27,12 +27,12 @@ class Neo4J {
   protected exec<T>(
     cypher: string,
     params: any,
-    mode: neo4j.SessionMode,
+    mode: neo4j.SessionMode
   ): Query<T> {
     if (checkDriver(this.driver)) {
       const session = this.driver.session({ defaultAccessMode: mode });
       return new Query<T>(session.run(cypher, params), async () =>
-        session.close(),
+        session.close()
       );
     }
     // impossible
@@ -58,7 +58,7 @@ class Neo4J {
     }
     this.driver = neo4j.driver(
       this.params.host,
-      neo4j.auth.basic(this.params.username, this.params.password),
+      neo4j.auth.basic(this.params.username, this.params.password)
     );
     await this.driver.verifyConnectivity();
     this.connected = true;
@@ -79,45 +79,14 @@ class Neo4J {
    * read from the database
    */
   public read<T>(cypher: string, params: any = {}) {
-    return this.exec<T>(cypher, params, 'READ');
+    return this.exec<T>(cypher, params, "READ");
   }
 
   /**
    * write to the database
    */
   public write<T>(cypher: string, params: any = {}) {
-    return this.exec<T>(cypher, params, 'WRITE');
-  }
-
-  /**
-   * create a node with a GraphAware uuid
-   */
-  public async createWithGraphAware<T>(label: string, data: any, schema?: any) {
-    const createResult = await this.write<{ node_id: number }>(
-      `
-        CREATE (node:${label} {data})
-        RETURN id(node) as node_id
-      `,
-      { data },
-    ).single();
-    if (createResult === null) {
-      throw new Error('An unknown error occurred creating the node');
-    }
-    const { node_id } = createResult;
-    const query: any = this.read<{ node: T }>(
-      `
-        MATCH (node:${label})
-        WHERE id(node) = toInt({node_id})
-        RETURN node
-      `,
-      { node_id },
-    );
-    const modifiedQuery = schema ? query.declare({ node: schema }) : query;
-    const matchResult = await modifiedQuery.single();
-    if (matchResult === null) {
-      throw new Error('An unknown error occurred creating the node');
-    }
-    return matchResult.node;
+    return this.exec<T>(cypher, params, "WRITE");
   }
 }
 

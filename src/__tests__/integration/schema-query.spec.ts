@@ -1,31 +1,31 @@
-import * as neo4j from 'neo4j-driver';
-import Neo4J from '../../neo4j';
-import Schema from '../../schema';
-import SchemaQuery from '../../schema-query';
+import * as neo4j from "neo4j-driver";
+import Neo4J from "../../neo4j";
+import Schema from "../../schema";
+import SchemaQuery from "../../schema-query";
 
-describe('SchemaQuery', () => {
+describe("SchemaQuery", () => {
   const db = new Neo4J({
-    host: 'bolt://localhost',
-    username: 'neo4j',
-    password: 'root',
+    host: "bolt://localhost",
+    username: "neo4j",
+    password: "password123",
   });
 
-  beforeAll(async done => {
+  beforeAll(async (done) => {
     await db.connect();
     done();
   });
 
-  beforeEach(async done => {
-    await db.write('MATCH (n) DETACH DELETE n').run();
+  beforeEach(async (done) => {
+    await db.write("MATCH (n) DETACH DELETE n").run();
     done();
   });
 
-  afterAll(async done => {
+  afterAll(async (done) => {
     await db.kill();
     done();
   });
 
-  describe('User', () => {
+  describe("User", () => {
     interface DbUser {
       uid: string;
       fname: string;
@@ -33,7 +33,7 @@ describe('SchemaQuery', () => {
       password: string;
     }
 
-    interface User extends Omit<DbUser, 'password'> {
+    interface User extends Omit<DbUser, "password"> {
       full_name: string;
     }
 
@@ -47,22 +47,22 @@ describe('SchemaQuery', () => {
       }
     }
 
-    it('should get the users full_name', async done => {
+    it("should get the users full_name", async (done) => {
       const driver = neo4j.driver(
-        'bolt://localhost',
-        neo4j.auth.basic('neo4j', 'root'),
+        "bolt://localhost",
+        neo4j.auth.basic("neo4j", "password123")
       );
       await driver.verifyConnectivity();
       const session = driver.session();
       const result = session.run(
-        'CREATE (user:User {fname:"ozzie", lname:"neher", password:"secret"}) RETURN DISTINCT user',
+        'CREATE (user:User {fname:"ozzie", lname:"neher", password:"secret"}) RETURN DISTINCT user'
       );
       const [user] = await new SchemaQuery<{ user: UserSchema }>(
         result,
         async () => await session.close(),
-        { user: UserSchema },
+        { user: UserSchema }
       ).all();
-      expect(user.user.public.full_name).toEqual('ozzie neher');
+      expect(user.user.public.full_name).toEqual("ozzie neher");
       await driver.close();
       done();
     });

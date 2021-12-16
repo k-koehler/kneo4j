@@ -1,13 +1,13 @@
-import Neo4J from '../../neo4j';
-import Schema from '../../schema';
+import Neo4J from "../../neo4j";
+import Schema from "../../schema";
 
-describe('Neo4J', () => {
-  describe('connect', () => {
-    it('should throw an error if the connection fails', async done => {
+describe("Neo4J", () => {
+  describe("connect", () => {
+    it("should throw an error if the connection fails", async (done) => {
       const neo4j = new Neo4J({
-        host: 'bolt://some_url',
-        username: 'some username',
-        password: 'some password',
+        host: "bolt://some_url",
+        username: "some username",
+        password: "some password",
       });
       const error = await (async () => {
         try {
@@ -22,11 +22,11 @@ describe('Neo4J', () => {
       done();
     });
 
-    it('should connect', async done => {
+    it("should connect", async (done) => {
       const neo4j = new Neo4J({
-        host: 'bolt://localhost',
-        username: 'neo4j',
-        password: 'root',
+        host: "bolt://localhost",
+        username: "neo4j",
+        password: "password123",
       });
       await neo4j.connect();
       await neo4j.kill();
@@ -34,12 +34,12 @@ describe('Neo4J', () => {
     });
   });
 
-  describe('kill', () => {
-    it('should destroy the driver', async done => {
+  describe("kill", () => {
+    it("should destroy the driver", async (done) => {
       const neo4j = new Neo4J({
-        host: 'bolt://localhost',
-        username: 'neo4j',
-        password: 'root',
+        host: "bolt://localhost",
+        username: "neo4j",
+        password: "password123",
       });
       await neo4j.connect();
       await neo4j.kill();
@@ -47,64 +47,64 @@ describe('Neo4J', () => {
     });
   });
 
-  describe('read & write', () => {
+  describe("read & write", () => {
     const db = new Neo4J({
-      host: 'bolt://localhost',
-      username: 'neo4j',
-      password: 'root',
+      host: "bolt://localhost",
+      username: "neo4j",
+      password: "password123",
     });
 
-    beforeAll(async done => {
+    beforeAll(async (done) => {
       await db.connect();
       done();
     });
 
-    beforeEach(async done => {
-      await db.write('MATCH (n) DETACH DELETE n').run();
+    beforeEach(async (done) => {
+      await db.write("MATCH (n) DETACH DELETE n").run();
       done();
     });
 
-    afterAll(async done => {
+    afterAll(async (done) => {
       await db.kill();
       done();
     });
 
-    it('should create a node and return it back', async done => {
+    it("should create a node and return it back", async (done) => {
       expect(
-        await db.read<{ uid: string }>('MATCH (n) RETURN n.uid as uid').all(),
+        await db.read<{ uid: string }>("MATCH (n) RETURN n.uid as uid").all()
       ).toHaveLength(0);
-      await db.write<void>('CREATE (node:Node) RETURN node').run();
+      await db.write<void>("CREATE (node:Node) RETURN node").run();
       expect(
-        await db.read<{ uid: string }>('MATCH (n) RETURN n.uid as uid').all(),
+        await db.read<{ uid: string }>("MATCH (n) RETURN n.uid as uid").all()
       ).toHaveLength(1);
       done();
     });
 
-    it('should read a basic node', async done => {
+    it("should read a basic node", async (done) => {
       await db.write<void>('CREATE (node:Node {foo: "bar"}) RETURN node').run();
       const [res] = await db
-        .read<{ n: { foo: string } }>('MATCH (n) RETURN n')
+        .read<{ n: { foo: string } }>("MATCH (n) RETURN n")
         .all();
-      expect(res.n.foo).toBe('bar');
+      expect(res.n.foo).toBe("bar");
       done();
     });
 
-    it('should read a basic node with an int', async done => {
-      await db.write<void>('CREATE (node:Node {foo: 1}) RETURN node').run();
+    it("should read a basic node with an int", async (done) => {
+      await db.write<void>("CREATE (node:Node {foo: 1}) RETURN node").run();
       const [res] = await db
-        .read<{ n: { foo: string } }>('MATCH (n) RETURN n')
+        .read<{ n: { foo: string } }>("MATCH (n) RETURN n")
         .all();
       expect(res.n.foo).toBe(1);
       done();
     });
 
-    it('should read a basic node with a collect of some other nodes', async done => {
+    it("should read a basic node with a collect of some other nodes", async (done) => {
       await db
         .write<void>(
           `
             CREATE (node:Node {node_value:1})
             CREATE (other_node:OtherNode {node_value:2})
-          `,
+          `
         )
         .run();
       const res = await db
@@ -116,7 +116,7 @@ describe('Neo4J', () => {
             MATCH (node:Node)
             MATCH (other_node:OtherNode) 
             RETURN node, collect(other_node) as collected
-          `,
+          `
         )
         .all();
       expect(res).toHaveLength(1);
@@ -125,12 +125,12 @@ describe('Neo4J', () => {
       done();
     });
 
-    it('should read an optional match null', async done => {
+    it("should read an optional match null", async (done) => {
       await db
         .write<void>(
           `
             CREATE (node:Node {node_value: 10})
-          `,
+          `
         )
         .run();
       const res = await db
@@ -142,7 +142,7 @@ describe('Neo4J', () => {
             MATCH (node:Node)
             OPTIONAL MATCH (other_node:OtherNode) 
             RETURN node, other_node
-          `,
+          `
         )
         .all();
       const [{ node, other_node }] = res;
@@ -151,12 +151,12 @@ describe('Neo4J', () => {
       done();
     });
 
-    it('should get a map', async done => {
+    it("should get a map", async (done) => {
       await db
         .write<void>(
           `
             CREATE (node:Node {node_value: 10})
-          `,
+          `
         )
         .run();
       const res = await db
@@ -166,23 +166,23 @@ describe('Neo4J', () => {
           `
             MATCH (node:Node)
             RETURN node{.*, foo:"bar"} as node
-          `,
+          `
         )
         .single();
       const { node } = res!;
       expect(node.node_value).toBe(10);
-      expect(node.foo).toBe('bar');
+      expect(node.foo).toBe("bar");
       done();
     });
 
-    it('should allow arbitrary callback in forEach method', async done => {
+    it("should allow arbitrary callback in forEach method", async (done) => {
       let sum = 0;
       await db
         .read<{ num: number }>(
           `
             UNWIND range(0,100) as num
             RETURN num
-          `,
+          `
         )
         .forEach(({ num }) => (sum += num));
       expect(sum).toBe(
@@ -192,65 +192,30 @@ describe('Neo4J', () => {
             //
           }
           return comparatorSum;
-        })(),
+        })()
       );
       done();
     });
   });
 
-  describe('createWithGraphAware', () => {
+  describe("User", () => {
     const db = new Neo4J({
-      host: 'bolt://localhost',
-      username: 'neo4j',
-      password: 'root',
+      host: "bolt://localhost",
+      username: "neo4j",
+      password: "password123",
     });
 
-    beforeAll(async done => {
+    beforeAll(async (done) => {
       await db.connect();
       done();
     });
 
-    beforeEach(async done => {
-      await db.write('MATCH (n) DETACH DELETE n').run();
+    beforeEach(async (done) => {
+      await db.write("MATCH (n) DETACH DELETE n").run();
       done();
     });
 
-    afterAll(async done => {
-      await db.kill();
-      done();
-    });
-
-    it('should create a node', async done => {
-      const user = await db.createWithGraphAware<{ name: string; uid: string }>(
-        'User',
-        {
-          name: 'Kevin',
-        },
-      );
-      expect(user?.name).toBe('Kevin');
-      expect(user?.uid).toBeDefined();
-      done();
-    });
-  });
-
-  describe('User', () => {
-    const db = new Neo4J({
-      host: 'bolt://localhost',
-      username: 'neo4j',
-      password: 'root',
-    });
-
-    beforeAll(async done => {
-      await db.connect();
-      done();
-    });
-
-    beforeEach(async done => {
-      await db.write('MATCH (n) DETACH DELETE n').run();
-      done();
-    });
-
-    afterAll(async done => {
+    afterAll(async (done) => {
       await db.kill();
       done();
     });
@@ -262,7 +227,7 @@ describe('Neo4J', () => {
       password: string;
     }
 
-    interface User extends Omit<DbUser, 'password'> {
+    interface User extends Omit<DbUser, "password"> {
       full_name: string;
     }
 
@@ -276,14 +241,14 @@ describe('Neo4J', () => {
       }
     }
 
-    it('should get the users full_name', async done => {
+    it("should get the users full_name", async (done) => {
       const { user } = (await db
         .write<{ user: DbUser }>(
-          'CREATE (user:User {fname:"ozzie", lname:"neher", password:"secret"}) RETURN DISTINCT user',
+          'CREATE (user:User {fname:"ozzie", lname:"neher", password:"secret"}) RETURN DISTINCT user'
         )
         .declare<{ user: UserSchema }>({ user: UserSchema })
         .single())!;
-      expect(user.public.full_name).toEqual('ozzie neher');
+      expect(user.public.full_name).toEqual("ozzie neher");
       done();
     });
   });

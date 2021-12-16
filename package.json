@@ -1,6 +1,6 @@
 {
-  "name": "@safetytek/neo4j-ts",
-  "version": "0.0.5",
+  "name": "kneo4j",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -21,6 +21,6 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "neo4j-driver": "^4.0.1"
+    "neo4j-driver": "^4.4.1"
   }
 }

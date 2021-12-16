@@ -1,5 +1,5 @@
-import * as neo4jDriver from 'neo4j-driver';
-import Neo4J, { checkDriver } from '../../neo4j';
+import * as neo4jDriver from "neo4j-driver";
+import Neo4J, { checkDriver } from "../../neo4j";
 
 class TestNeo4J extends Neo4J {
   public get privateMethods() {
@@ -16,23 +16,23 @@ class TestNeo4J extends Neo4J {
   }
 }
 
-describe('Neo4J', () => {
-  describe('constructor', () => {
-    it('should set the driver to null', async done => {
+describe("Neo4J", () => {
+  describe("constructor", () => {
+    it("should set the driver to null", async (done) => {
       const neo4j = new TestNeo4J({
-        host: 'some host',
-        username: 'some username',
-        password: 'some password',
+        host: "some host",
+        username: "some username",
+        password: "some password",
       });
       expect(neo4j.privateFields.driver).toBeNull();
       done();
     });
 
-    it('should set the params to the passed params', async done => {
+    it("should set the params to the passed params", async (done) => {
       const params = {
-        host: 'some host',
-        username: 'some username',
-        password: 'some password',
+        host: "some host",
+        username: "some username",
+        password: "some password",
       };
       const neo4j = new TestNeo4J(params);
       expect(neo4j.privateFields.params).toEqual(params);
@@ -40,47 +40,47 @@ describe('Neo4J', () => {
     });
   });
 
-  describe('connect', () => {
-    it('should wait to verify connectivity', async done => {
+  describe("connect", () => {
+    it("should wait to verify connectivity", async (done) => {
       jest
-        .spyOn(neo4jDriver.auth, 'basic')
+        .spyOn(neo4jDriver.auth, "basic")
         .mockImplementationOnce(() => null as any);
       let connectivityInvoked = false;
-      jest.spyOn(neo4jDriver, 'driver').mockImplementationOnce(
+      jest.spyOn(neo4jDriver, "driver").mockImplementationOnce(
         () =>
           ({
             async verifyConnectivity() {
               connectivityInvoked = true;
             },
-          } as any),
+          } as any)
       );
       new Neo4J({
-        host: 'some host',
-        username: 'some username',
-        password: 'some password',
+        host: "some host",
+        username: "some username",
+        password: "some password",
       }).connect();
       expect(connectivityInvoked).toBe(true);
       done();
     });
 
-    it('should throw an error if it fails to verify connectivity', async done => {
+    it("should throw an error if it fails to verify connectivity", async (done) => {
       jest
-        .spyOn(neo4jDriver.auth, 'basic')
+        .spyOn(neo4jDriver.auth, "basic")
         .mockImplementationOnce(() => null as any);
-      jest.spyOn(neo4jDriver, 'driver').mockImplementationOnce(
+      jest.spyOn(neo4jDriver, "driver").mockImplementationOnce(
         () =>
           ({
             async verifyConnectivity() {
-              throw new Error('yeet!');
+              throw new Error("yeet!");
             },
-          } as any),
+          } as any)
       );
       const error = await (async () => {
         try {
           await new Neo4J({
-            host: 'some host',
-            username: 'some username',
-            password: 'some password',
+            host: "some host",
+            username: "some username",
+            password: "some password",
           }).connect();
           return false;
         } catch {
@@ -92,12 +92,12 @@ describe('Neo4J', () => {
     });
   });
 
-  describe('kill', () => {
-    it('should throw an error, not yet connected', async done => {
+  describe("kill", () => {
+    it("should throw an error, not yet connected", async (done) => {
       const neo4j = new Neo4J({
-        host: 'some host',
-        username: 'some username',
-        password: 'some password',
+        host: "some host",
+        username: "some username",
+        password: "some password",
       });
       const error = await (async () => {
         try {
@@ -112,16 +112,16 @@ describe('Neo4J', () => {
     });
   });
 
-  describe('exec', () => {
-    it('should throw an error, driver not connected', async done => {
+  describe("exec", () => {
+    it("should throw an error, driver not connected", async (done) => {
       const neo4j = new TestNeo4J({
-        host: 'bolt://localhost',
-        username: 'neo4j',
-        password: 'root',
+        host: "bolt://localhost",
+        username: "neo4j",
+        password: "password123",
       });
       const error = await (async () => {
         try {
-          await neo4j.privateMethods.exec('RETURN "foo"', {}, 'READ').run();
+          await neo4j.privateMethods.exec('RETURN "foo"', {}, "READ").run();
           return false;
         } catch {
           return true;
@@ -133,13 +133,13 @@ describe('Neo4J', () => {
   });
 });
 
-describe('__test', () => {
-  describe('checkDriver', () => {
-    it('should throw, is null', () => {
+describe("__test", () => {
+  describe("checkDriver", () => {
+    it("should throw, is null", () => {
       expect(() => checkDriver(null)).toThrowError();
     });
 
-    it('should not throw, and return true, driver not null', () => {
+    it("should not throw, and return true, driver not null", () => {
       expect(checkDriver({} as neo4jDriver.Driver)).toBe(true);
     });
   });
